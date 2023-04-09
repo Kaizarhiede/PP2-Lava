@@ -4,16 +4,20 @@ using UnityEngine;
 
 public class CS_playerController : MonoBehaviour
 {
-
+    [Header("----- Components -----")]
     [SerializeField] CharacterController controller;
-    [SerializeField] float playerSpeed;
-    [SerializeField] float jumpHeight;
-    [SerializeField] float gravityValue;
-    [SerializeField] int jumpsMax;
 
-    [SerializeField] float shootRate;
-    [SerializeField] int shootDistance;
-    [SerializeField] GameObject cube;
+    [Header("----- Player Stats -----")]
+    [Range(3, 8)] [SerializeField] float playerSpeed;
+    [Range(5, 10)] [SerializeField] float jumpHeight;
+    [Range(5, 20)] [SerializeField] float gravityValue;
+    [Range(0, 2)] [SerializeField] int jumpsMax;
+
+    [Header("----- Gun Stats -----")]
+    [Range(3, 8)] [SerializeField] int shootDamage;
+    [Range(0.1f, 3)] [SerializeField] float shootRate;
+    [Range(5, 20)] [SerializeField] int shootDistance;
+    //[SerializeField] GameObject cube;
 
     int jumpedTimes;
     private Vector3 playerVelocity;
@@ -29,9 +33,15 @@ public class CS_playerController : MonoBehaviour
 
     void Update()
     {
-        movement();
-        if(!isShooting && Input.GetButton("Shoot"))
-            StartCoroutine(shoot());
+        if (!CS_gameManager.instance.isPaused)
+        {
+
+            movement();
+
+            if (!isShooting && Input.GetButton("Shoot"))
+                StartCoroutine(shoot());
+        }
+        
     }
 
     void movement()
@@ -67,8 +77,18 @@ public class CS_playerController : MonoBehaviour
         RaycastHit hit;
         if(Physics.Raycast(Camera.main.ViewportPointToRay(new Vector2(0.5f, 0.5f)), out hit, shootDistance))
         {
+            //if(hit.transform.CompareTag("Damageable"))
+            //{
+            //do something
+            //}
+            //Instantiate(cube, hit.point, transform.rotation);
 
-            Instantiate(cube, hit.point, transform.rotation);
+            CS_IDamage damageable = hit.collider.GetComponent<CS_IDamage>();
+
+            if(damageable != null)
+            {
+                damageable.takeDamage(shootDamage);
+            }
 
         }
 
